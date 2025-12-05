@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Menu, Sparkles, User, LogOut } from "lucide-react"
+import { Bell, Menu, Sparkles, User, LogOut, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,8 +11,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { signOut } from "@/app/auth/actions"
+import { useRouter } from "next/navigation"
 
 export function MobileHeader() {
+  const router = useRouter()
+
   const handleSignOut = async () => {
     await signOut()
   }
@@ -23,9 +26,9 @@ export function MobileHeader() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 group transition-all duration-200 hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10"
+          className="h-10 w-10 group hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10"
         >
-          <Menu className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
+          <Menu className="h-5 w-5 group-hover:text-primary" />
         </Button>
 
         <div className="flex items-center gap-2">
@@ -41,9 +44,10 @@ export function MobileHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 group relative transition-all duration-200 hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10"
+            className="h-10 w-10 group relative hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10"
+            onClick={() => router.push('/notifications')}
           >
-            <Bell className="h-5 w-5 transition-colors duration-200 group-hover:text-secondary" />
+            <Bell className="h-5 w-5 group-hover:text-primary" />
             <span className="absolute top-2 right-2 h-2 w-2 bg-accent rounded-full animate-pulse" />
           </Button>
 
@@ -52,14 +56,18 @@ export function MobileHeader() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 group transition-all duration-200 hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10"
+                className="h-10 w-10 group hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10"
               >
-                <User className="h-5 w-5 transition-colors duration-200 group-hover:text-accent" />
+                <User className="h-5 w-5 group-hover:text-primary" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>アカウント</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push('/account')} className="cursor-pointer">
+                <UserCircle className="mr-2 h-4 w-4" />
+                アカウント設定
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
                 ログアウト
