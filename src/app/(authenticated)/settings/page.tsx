@@ -469,12 +469,12 @@ export default function SettingsPage() {
           ) : (
             <Button
               variant="outline"
-              className="w-full transition-all duration-200 hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10 hover:text-primary hover:border-primary/20 group"
+              className="w-full hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10 hover:text-primary hover:border-primary/20 group"
               onClick={() => setIsAdding(true)}
               disabled={editingId !== null}
             >
-              <Plus className="h-4 w-4 mr-2 transition-colors duration-200" />
-              <span className="transition-colors duration-200">推しを追加</span>
+              <Plus className="h-4 w-4 mr-2" />
+              推しを追加
             </Button>
           )}
         </CardContent>
@@ -614,12 +614,12 @@ export default function SettingsPage() {
           ) : (
             <Button
               variant="outline"
-              className="w-full transition-all duration-200 hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10 hover:text-primary hover:border-primary/20 group"
+              className="w-full hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10 hover:text-primary hover:border-primary/20 group"
               onClick={() => setIsAddingTag(true)}
               disabled={editingTagId !== null}
             >
-              <Plus className="h-4 w-4 mr-2 transition-colors duration-200" />
-              <span className="transition-colors duration-200">タグを追加</span>
+              <Plus className="h-4 w-4 mr-2" />
+              タグを追加
             </Button>
           )}
         </CardContent>
