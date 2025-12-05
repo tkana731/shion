@@ -24,15 +24,29 @@ export function BottomNav() {
               variant="ghost"
               size="sm"
               className={cn(
-                "flex flex-col items-center justify-center gap-1 h-14 px-3 rounded-2xl transition-all duration-200",
-                item.isMain &&
-                  "bg-gradient-to-br from-primary via-secondary to-accent text-white hover:shadow-xl hover:scale-110 -mt-6 h-14 w-14 shadow-lg",
-                item.active && !item.isMain && "text-primary bg-primary/10",
-                !item.active && !item.isMain && "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                "flex flex-col items-center justify-center gap-1 h-14 px-3 rounded-2xl",
+                item.isMain
+                  ? "bg-gradient-to-br from-primary via-secondary to-accent text-white hover:shadow-xl hover:shadow-primary/20 hover:scale-110 -mt-6 h-14 w-14 shadow-lg transition-all duration-200 group"
+                  : item.active
+                  ? "text-primary bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 cursor-default hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10 hover:text-primary"
+                  : "text-muted-foreground hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10 transition-all duration-200 group"
               )}
             >
-              <Icon className={cn("h-5 w-5", item.isMain && "h-6 w-6")} />
-              {!item.isMain && <span className="text-xs font-medium">{item.label}</span>}
+              <Icon
+                className={cn(
+                  "h-5 w-5",
+                  item.isMain && "h-6 w-6",
+                  !item.active && !item.isMain && "transition-colors duration-200 group-hover:text-primary"
+                )}
+              />
+              {!item.isMain && (
+                <span className={cn(
+                  "text-xs font-medium",
+                  !item.active && "transition-colors duration-200 group-hover:text-secondary"
+                )}>
+                  {item.label}
+                </span>
+              )}
             </Button>
           )
         })}
