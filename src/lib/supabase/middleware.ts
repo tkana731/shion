@@ -35,12 +35,47 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 認証が必要なルートを保護する場合は、ここに追加
-  // if (!user && !request.nextUrl.pathname.startsWith('/login')) {
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = '/login';
-  //   return NextResponse.redirect(url);
-  // }
+  // メール確認のcodeパラメータがトップページにある場合、callbackにリダイレクト
+  if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('code')) {
+    const code = request.nextUrl.searchParams.get('code');
+    const url = request.nextUrl.clone();
+    url.pathname = '/auth/callback';
+    url.search = `?code=${code}`;
+    return NextResponse.redirect(url);
+  }
+
+  // エラーパラメータがトップページにある場合、ログインページにリダイレクト
+  if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('error')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    // searchParamsはそのまま保持される（error, error_code, error_descriptionなど）
+    return NextResponse.redirect(url);
+  }
+
+  // 認証が必要なルートを保護
+  const protectedRoutes = ['/dashboard'];
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route)
+  );
+
+  // 認証されていないユーザーが保護されたルートにアクセスしようとした場合、ログインページにリダイレクト
+  if (!user && isProtectedRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  // 認証済みユーザーがログイン/サインアップページ、またはトップページにアクセスしようとした場合、ダッシュボードにリダイレクト
+  if (
+    user &&
+    (request.nextUrl.pathname === '/' ||
+      request.nextUrl.pathname === '/login' ||
+      request.nextUrl.pathname === '/signup')
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }
