@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { X, ArrowLeft, Minus, Plus } from "lucide-react"
+import { X, Minus, Plus } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { toast } from "sonner"
+import { PageHeader } from "@/components/page-header"
 
 // カテゴリの定義
 const EXPENSE_CATEGORIES = ["グッズ", "イベント", "配信", "遠征", "その他推し活"]
@@ -207,25 +208,15 @@ function EditTransactionFormContent({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div>
-      {/* Page Title Header */}
-      <div className="sticky top-16 z-10 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="flex items-center justify-between p-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-            className="hover:bg-primary/10"
-          >
-            <ArrowLeft className="h-5 w-5 text-foreground hover:text-primary transition-colors" />
-          </Button>
-          <h1 className="text-lg font-bold">取引を編集</h1>
-          <div className="w-10" />
-        </div>
-      </div>
+    <div className="p-4 space-y-6 max-w-2xl mx-auto">
+      {/* Page Title */}
+      <PageHeader
+        title="取引を編集"
+        description="既存の取引を更新します"
+      />
 
       {/* Type Display */}
-      <div className="p-4">
+      <div>
         <div className="flex gap-2">
           <Button
             type="button"
@@ -249,7 +240,7 @@ function EditTransactionFormContent({ params }: { params: Promise<{ id: string }
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="p-4 space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="amount">金額 *</Label>
           <div className="relative">

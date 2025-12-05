@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils"
 
 const navItems = [
   { icon: Home, label: "ホーム", href: "/dashboard", isMain: false },
-  { icon: BarChart3, label: "レポート", href: "/reports", isMain: false },
-  { icon: PenLine, label: "追加", href: "/transactions/new", isMain: true },
   { icon: Receipt, label: "履歴", href: "/transactions", isMain: false },
+  { icon: PenLine, label: "追加", href: "/transactions/new", isMain: true },
+  { icon: BarChart3, label: "レポート", href: "/reports", isMain: false },
   { icon: Settings, label: "設定", href: "/settings", isMain: false },
 ]
 
