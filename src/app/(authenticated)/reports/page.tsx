@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/page-header"
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TrendingUp, TrendingDown, DollarSign, Heart } from "lucide-react"
+import { getCategoryIcon, getCategoryConfig } from "@/lib/categories"
 
 interface Transaction {
   id: string
@@ -290,6 +291,37 @@ export default function ReportsPage() {
                 <Tooltip formatter={(value) => formatAmount(value as number)} />
               </PieChart>
             </ResponsiveContainer>
+            <div className="mt-6 space-y-4">
+              {categoryTotals.map((cat, index) => {
+                const CategoryIcon = getCategoryIcon(cat.category)
+                const config = getCategoryConfig(cat.category)
+                const percentage = (cat.amount / totalExpense) * 100
+                return (
+                  <div key={cat.category} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1.5 rounded-lg ${config?.bgColor || 'bg-gray-100'} ${config?.darkBgColor || 'dark:bg-gray-950'}`}>
+                          <CategoryIcon className={`h-4 w-4 ${config?.color || 'text-gray-700 dark:text-gray-300'}`} />
+                        </div>
+                        <span className="font-medium">{cat.category}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {formatAmount(cat.amount)} ({percentage.toFixed(1)}%)
+                      </span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${percentage}%`,
+                          backgroundColor: COLORS[index % COLORS.length],
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </CardContent>
         </Card>
       )}

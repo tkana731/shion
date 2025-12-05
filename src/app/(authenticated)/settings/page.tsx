@@ -28,6 +28,12 @@ interface Oshi {
   color: string | null
 }
 
+interface Tag {
+  id: string
+  name: string
+  color: string | null
+}
+
 const PRESET_COLORS = [
   "#FF69B4", // ピンク
   "#9333EA", // 紫
@@ -55,8 +61,17 @@ export default function SettingsPage() {
   const [editName, setEditName] = useState("")
   const [editColor, setEditColor] = useState("")
 
+  // タグ管理
+  const [tagList, setTagList] = useState<Tag[]>([])
+  const [editingTagId, setEditingTagId] = useState<string | null>(null)
+  const [deletingTagId, setDeletingTagId] = useState<string | null>(null)
+  const [newTagName, setNewTagName] = useState("")
+  const [isAddingTag, setIsAddingTag] = useState(false)
+  const [editTagName, setEditTagName] = useState("")
+
   useEffect(() => {
     fetchOshi()
+    fetchTags()
   }, [])
 
   const fetchOshi = async () => {
@@ -184,9 +199,132 @@ export default function SettingsPage() {
     }
   }
 
+  // タグ管理機能
+  const fetchTags = async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('tags')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching tags:', error)
+      toast.error("タグの読み込みに失敗しました")
+      return
+    }
+
+    setTagList(data || [])
+  }
+
+  const handleAddTag = async () => {
+    if (!newTagName.trim()) {
+      toast.error("タグ名を入力してください")
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error("認証エラーが発生しました")
+        router.push('/login')
+        return
+      }
+
+      const { error } = await supabase
+        .from('tags')
+        .insert({
+          user_id: user.id,
+          name: newTagName,
+          color: null,
+        })
+
+      if (error) throw error
+
+      toast.success("タグを追加しました")
+      setNewTagName("")
+      setIsAddingTag(false)
+      fetchTags()
+    } catch (error) {
+      console.error('Error adding tag:', error)
+      toast.error("タグの追加に失敗しました")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleStartEditTag = (tag: Tag) => {
+    setEditingTagId(tag.id)
+    setEditTagName(tag.name)
+  }
+
+  const handleSaveEditTag = async (id: string) => {
+    if (!editTagName.trim()) {
+      toast.error("タグ名を入力してください")
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('tags')
+        .update({
+          name: editTagName,
+        })
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success("タグを更新しました")
+      setEditingTagId(null)
+      fetchTags()
+    } catch (error) {
+      console.error('Error updating tag:', error)
+      toast.error("タグの更新に失敗しました")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteTag = async (id: string) => {
+    setLoading(true)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('tags')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success("タグを削除しました")
+      setDeletingTagId(null)
+      fetchTags()
+    } catch (error) {
+      console.error('Error deleting tag:', error)
+      toast.error("タグの削除に失敗しました")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="p-4 space-y-6 max-w-2xl mx-auto">
-      <PageHeader title="設定" description="推しを管理できます" />
+      <PageHeader title="設定" description="推しとタグを管理できます" />
 
       <Card>
         <CardHeader>
@@ -342,7 +480,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* 削除確認ダイアログ */}
+      {/* 推し削除確認ダイアログ */}
       <AlertDialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -355,6 +493,151 @@ export default function SettingsPage() {
             <AlertDialogCancel disabled={loading}>キャンセル</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deletingId && handleDelete(deletingId)}
+              disabled={loading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              削除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* タグ管理セクション */}
+      <Card>
+        <CardHeader>
+          <CardTitle>タグ管理</CardTitle>
+          <CardDescription>
+            取引に付与するハッシュタグを管理できます
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* タグリスト */}
+          {tagList.length === 0 && !isAddingTag && (
+            <div className="text-center py-8 text-muted-foreground">
+              タグが登録されていません
+            </div>
+          )}
+
+          {tagList.map((tag) => (
+            <div key={tag.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+              {editingTagId === tag.id ? (
+                <>
+                  <div className="flex-1">
+                    <Input
+                      value={editTagName}
+                      onChange={(e) => setEditTagName(e.target.value)}
+                      placeholder="タグ名"
+                    />
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleSaveEditTag(tag.id)}
+                      disabled={loading}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setEditingTagId(null)}
+                      disabled={loading}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Badge variant="secondary" className="text-sm">
+                    #{tag.name}
+                  </Badge>
+                  <div className="flex-1" />
+                  <div className="flex gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleStartEditTag(tag)}
+                      disabled={loading}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setDeletingTagId(tag.id)}
+                      disabled={loading}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+
+          {/* 新規追加フォーム */}
+          {isAddingTag ? (
+            <div className="p-3 rounded-lg border bg-card space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="new-tag-name">タグ名</Label>
+                <Input
+                  id="new-tag-name"
+                  value={newTagName}
+                  onChange={(e) => setNewTagName(e.target.value)}
+                  placeholder="例: 遠征, イベント参戦, グッズ購入"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAddTag}
+                  disabled={loading}
+                  className="flex-1"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  追加
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsAddingTag(false)
+                    setNewTagName("")
+                  }}
+                  disabled={loading}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full transition-all duration-200 hover:bg-gradient-to-br hover:from-primary/10 hover:via-secondary/10 hover:to-accent/10 hover:text-primary hover:border-primary/20 group"
+              onClick={() => setIsAddingTag(true)}
+              disabled={editingTagId !== null}
+            >
+              <Plus className="h-4 w-4 mr-2 transition-colors duration-200" />
+              <span className="transition-colors duration-200">タグを追加</span>
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* タグ削除確認ダイアログ */}
+      <AlertDialog open={!!deletingTagId} onOpenChange={() => setDeletingTagId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>タグを削除しますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              この操作は取り消せません。このタグに紐づいた取引データからタグが削除されます。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>キャンセル</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingTagId && handleDeleteTag(deletingTagId)}
               disabled={loading}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

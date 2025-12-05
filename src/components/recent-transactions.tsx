@@ -5,44 +5,12 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, Trash2, ShoppingBag, UtensilsCrossed, CalendarDays, Wallet, Receipt, Edit } from "lucide-react"
+import { ChevronRight, Trash2, Receipt, Edit } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { toast } from "sonner"
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
-
-const categoryIcons: Record<string, any> = {
-  グッズ: ShoppingBag,
-  食費: UtensilsCrossed,
-  イベント: CalendarDays,
-  給与: Wallet,
-  給料: Wallet,
-  収入: Wallet,
-}
-
-const getCategoryColor = (category: string) => {
-  const colorMap: Record<string, string> = {
-    グッズ: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-    イベント: "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
-    配信: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-    遠征: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
-    食費: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
-    家賃: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
-    光熱費: "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
-    交通費: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300",
-    通信費: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
-    娯楽: "bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-300",
-    給与: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300",
-    副業: "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
-  }
-  return colorMap[category] || "bg-gray-100 text-gray-700 dark:bg-gray-950 dark:text-gray-300"
-}
-
-const getOshiColor = (color: string | null) => {
-  if (!color) return "bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/30"
-  // colorをTailwindクラスに変換（簡易版）
-  return `bg-${color}-500/10 text-${color}-700 dark:text-${color}-400 border-${color}-500/30`
-}
+import { getCategoryIcon, getCategoryColor } from "@/lib/categories"
 
 interface RecentTransactionsProps {
   includeFutureExpenses: boolean
@@ -189,7 +157,7 @@ export function RecentTransactions({ includeFutureExpenses, refreshTrigger }: Re
         </div>
         <div className="space-y-1">
           {transactions.map((transaction) => {
-            const CategoryIcon = categoryIcons[transaction.category] || ShoppingBag
+            const CategoryIcon = getCategoryIcon(transaction.category)
             const { relativeTime, fullDate } = formatDate(transaction.date)
             const categoryColor = getCategoryColor(transaction.category)
             const isIncome = transaction.type === 'income'

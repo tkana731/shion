@@ -12,11 +12,8 @@ import { X, Minus, Plus } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { toast } from "sonner"
 import { PageHeader } from "@/components/page-header"
-
-// カテゴリの定義
-const EXPENSE_CATEGORIES = ["グッズ", "イベント", "配信", "遠征", "その他推し活"]
-const LIFE_CATEGORIES = ["食費", "家賃", "光熱費", "交通費", "通信費", "娯楽", "その他生活費"]
-const INCOME_CATEGORIES = ["給与", "副業", "その他収入"]
+import { CategorySelect } from "@/components/category-select"
+import { EXPENSE_CATEGORIES, LIFE_CATEGORIES, INCOME_CATEGORIES } from "@/lib/categories"
 
 interface Oshi {
   id: string
@@ -240,7 +237,7 @@ function EditTransactionFormContent({ params }: { params: Promise<{ id: string }
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 pb-32">
         <div className="space-y-2">
           <Label htmlFor="amount">金額 *</Label>
           <div className="relative">
@@ -285,21 +282,11 @@ function EditTransactionFormContent({ params }: { params: Promise<{ id: string }
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="category">カテゴリ *</Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger>
-              <SelectValue placeholder="カテゴリを選択" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map(cat => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <CategorySelect
+          value={category}
+          onValueChange={setCategory}
+          categories={categories}
+        />
 
         <div className="space-y-2">
           <Label htmlFor="date">日付 *</Label>
@@ -323,7 +310,7 @@ function EditTransactionFormContent({ params }: { params: Promise<{ id: string }
                   className="cursor-pointer"
                   onClick={() => toggleTag(tag.id)}
                 >
-                  {tag.name}
+                  #{tag.name}
                   {selectedTags.includes(tag.id) && (
                     <X className="ml-1 h-3 w-3" />
                   )}
